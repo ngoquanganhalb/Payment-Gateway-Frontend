@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import RootLayout from "@/layouts/RootLayout";
 import MainLayout from "../layouts/MainLayout";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import { LoginPage } from "@/pages/login/LoginPage";
@@ -7,22 +8,27 @@ import { ROUTES } from "@/constant/routes";
 
 const router = createBrowserRouter([
   {
-    path: ROUTES.ROOT,
-    element: <MainLayout />,
+    element: <RootLayout />,
     children: [
       {
-        index: true,
-        element: <DashboardPage />,
+        path: ROUTES.DASHBOARD,
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: <DashboardPage />,
+          },
+        ],
+      },
+      {
+        path: ROUTES.SIGN_IN,
+        element: <LoginPage />,
+      },
+      {
+        path: ROUTES.SIGN_UP,
+        element: <SignupPage />,
       },
     ],
-  },
-  {
-    path: ROUTES.SIGN_IN,
-    element: <LoginPage />,
-  },
-  {
-    path: ROUTES.SIGN_UP,
-    element: <SignupPage />,
   },
 ]);
 

@@ -4,11 +4,46 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constant/routes";
+import { useAuth } from "@/axios/AuthContext";
+import { getApiErrorMessages } from "@/lib/error";
+import { toastError } from "@/lib/toast";
+import { useForm } from "react-hook-form";
+
+type LoginFormValues = {
+  username: string;
+  password: string;
+};
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+    mode: "onSubmit",
+  });
+
+  const handleLogin = async (data: LoginFormValues) => {
+    const { username, password } = data;
+
+    try {
+      await login({ username, password });
+      navigate(ROUTES.DASHBOARD);
+    } catch (error) {
+      const messages = getApiErrorMessages(error);
+      messages.forEach((m) => toastError(m));
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
@@ -74,16 +109,22 @@ export function LoginPage() {
             </div>
 
             {/* Form */}
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
+                  {...register("username", {
+                    required: "Username is required",
+                  })}
                   placeholder="balamia@gmail.com"
-                  autoComplete="email"
-                  required
+                  autoComplete="username"
+                  // aria-invalid={!!errors.username}
                 />
+                {errors.username?.message && (
+                  <p className="text-sm text-destructive flex flex-left">
+                    {errors.username.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -99,11 +140,13 @@ export function LoginPage() {
 
                 <div className="relative">
                   <Input
-                    id="password"
+                    {...register("password", {
+                      required: "Password is required",
+                    })}
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     autoComplete="current-password"
-                    required
+                    // aria-invalid={!!errors.password}
                     className="pr-10"
                   />
                   <button
@@ -121,10 +164,15 @@ export function LoginPage() {
                     )}
                   </button>
                 </div>
+                {errors.password?.message && (
+                  <p className="text-sm text-destructive flex flex-left">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
-              <Button type="submit" className="w-full">
-                Login now
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Logging in..." : "Login now"}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
@@ -136,7 +184,7 @@ export function LoginPage() {
                   Sign Up
                 </Link>
               </p>
-            </div>
+            </form>
           </CardContent>
         </Card>
       </div>

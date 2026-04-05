@@ -14,15 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/constant/routes";
+import { useAuth } from "@/axios/AuthContext";
 
 export default function Header() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // TODO: integrate real logout with auth slice/service
-    // For now: redirect to sign-in
-    navigate(ROUTES.SIGN_IN);
-  };
+  const { logout } = useAuth();
 
   return (
     <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-2">
@@ -128,7 +125,7 @@ export default function Header() {
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </DropdownMenuItem>
